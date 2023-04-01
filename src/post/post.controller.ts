@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get,NotFoundException,Param,ParseIntPipe,Post, Put, Query, UseInterceptors, UsePipes, ValidationPipe} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get,Logger,NotFoundException,Param,ParseIntPipe,Post, Put, Query, UseInterceptors, UsePipes, ValidationPipe} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Post as prismaPost } from '@prisma/client';
 import { PostService } from './post.service';
@@ -18,7 +18,9 @@ export class PostController {
     //localhost:3000/posts?page=1&pageSize=20&orderField=title&orderDirection=desc
     @Get('posts')
     async getPosts(
-        @Query(ValidationPipe)getPostsDto : GetPostsDto): Promise<prismaPost[]> {
+        @Query()getPostsDto : GetPostsDto): Promise<prismaPost[]> {
+            console.log(getPostsDto);
+            
                 return this.postService.getPosts(getPostsDto)
     }
 
@@ -31,7 +33,7 @@ export class PostController {
     
     @Post('post')
     @UseInterceptors(FileInterceptor('thumbnail'))
-    async createPost(@Body(ValidationPipe) createPostDto: CreatePostDto): Promise<prismaPost> {
+    async createPost(@Body() createPostDto: CreatePostDto): Promise<prismaPost> {
         return this.postService.createPost(createPostDto);
     }
 
