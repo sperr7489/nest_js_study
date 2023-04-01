@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get,Param,ParseIntPipe,Post, Put, Query, UseInterceptors, UsePipes, ValidationPipe} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get,NotFoundException,Param,ParseIntPipe,Post, Put, Query, UseInterceptors, UsePipes, ValidationPipe} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Post as prismaPost } from '@prisma/client';
 import { PostService } from './post.service';
@@ -26,7 +26,6 @@ export class PostController {
 
     @Get('post/:id')
     async getById(@Param('id', ParseIntPipe) id: number): Promise<prismaPost>{
-        //
         return this.postService.getPostById({id});
     }
 
@@ -50,7 +49,14 @@ export class PostController {
 
     @Delete("post/:id")
     async delete(@Param("id",ParseIntPipe) id: number): Promise<prismaPost>{
+        const existPost  = await this.postService.getPostById({id});
+        console.log(existPost);
+        if(existPost) 
+            return this.postService.deletePost({id});
+        else
+            throw new NotFoundException("해당 Id에 해당하는 데이터가 존재하지 않습니다. ");
 
-        return this.postService.deletePost({id});
+            
+
     }
 }
