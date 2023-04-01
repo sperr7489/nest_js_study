@@ -4,7 +4,7 @@ import { Post as prismaPost } from '@prisma/client';
 import { PostService } from './post.service';
 import { PostFieldValidationPipe } from 'prisma/util/validation.pipe';
 import { orderDirection } from 'prisma/util/enum';
-import { CreatePostDto, GetPostsDto } from './post.dto';
+import { CreatePostDto, GetPostsDto, PutPostDTO } from './post.dto';
 import { validate } from 'class-validator';
 
 @Controller()
@@ -36,11 +36,8 @@ export class PostController {
     }
 
     @Put('post/:id')
-    async putPost(@Param("id",ParseIntPipe) id : number,@Body() data : prismaPost) : Promise<prismaPost>{
-        const { title, author, content, thumbnail } =  data;     
-        if( !title && !author && !content && !thumbnail)
-            throw new BadRequestException("적어도 하나의 데이터는 보내야 한다. ");
-        return this.postService.putPost({where : {id},data});
+    async putPost(@Param("id",ParseIntPipe) id : number,@Body(ValidationPipe) putPostDTO : PutPostDTO) : Promise<prismaPost>{
+        return this.postService.putPost({where : {id},data : putPostDTO});
     }
 
     @Delete("post/:id")
