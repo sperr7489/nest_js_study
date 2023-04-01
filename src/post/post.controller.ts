@@ -4,6 +4,8 @@ import { Post as prismaPost } from '@prisma/client';
 import { PostService } from './post.service';
 import { PostFieldValidationPipe } from 'prisma/util/validation.pipe';
 import { orderDirection } from 'prisma/util/enum';
+import { CreatePostDto, GetPostsDto } from './post.dto';
+import { validate } from 'class-validator';
 
 @Controller()
 export class PostController {
@@ -16,12 +18,8 @@ export class PostController {
     //localhost:3000/posts?page=1&pageSize=20&orderField=title&orderDirection=desc
     @Get('posts')
     async getPosts(
-        @Query("page", ParseIntPipe) page: number, 
-        @Query("pageSize" , ParseIntPipe) pageSize : number, 
-        @Query("orderField",PostFieldValidationPipe ) orderField : string, 
-        @Query("orderDirection") orderDirection : "asc" | "desc",
-        ): Promise<prismaPost[]> {
-        return this.postService.getPosts({page,pageSize,orderField,orderDirection})
+        @Query(ValidationPipe)getPostsDto : GetPostsDto): Promise<prismaPost[]> {
+                return this.postService.getPosts(getPostsDto)
     }
 
     @Get('post/:id')
@@ -33,10 +31,8 @@ export class PostController {
     
     @Post('post')
     @UseInterceptors(FileInterceptor('thumbnail'))
-    async createPost(@Body(ValidationPipe) data: prismaPost): Promise<prismaPost> {
-        if(!data.author || !data.content || !data.thumbnail || !data.title) 
-            throw new BadRequestException("필수 값이 들어있지 않다. ")
-        return this.postService.createPost(data);
+    async createPost(@Body(ValidationPipe) createPostDto: CreatePostDto): Promise<prismaPost> {
+        return this.postService.createPost(createPostDto);
     }
 
     @Put('post/:id')
@@ -50,13 +46,9 @@ export class PostController {
     @Delete("post/:id")
     async delete(@Param("id",ParseIntPipe) id: number): Promise<prismaPost>{
         const existPost  = await this.postService.getPostById({id});
-        console.log(existPost);
         if(existPost) 
             return this.postService.deletePost({id});
         else
             throw new NotFoundException("해당 Id에 해당하는 데이터가 존재하지 않습니다. ");
-
-            
-
     }
 }

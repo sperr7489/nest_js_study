@@ -1,6 +1,7 @@
 import { Body, Injectable } from '@nestjs/common';
 import { PrismaClient,Post, Prisma  } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
+import { GetPostsDto } from './post.dto';
 
 
 @Injectable()
@@ -13,7 +14,8 @@ export class PostService {
     }
 
 
-    async getPosts({page,pageSize,orderField,orderDirection}): Promise<Post[]> {
+    async getPosts(GetPostsDto : GetPostsDto): Promise<Post[]> {
+        const {page,pageSize,orderField,orderDirection} = GetPostsDto
         return this.prisma.post.findMany(
             {
                 skip : page,
